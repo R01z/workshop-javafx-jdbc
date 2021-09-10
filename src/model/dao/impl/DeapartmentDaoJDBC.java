@@ -29,19 +29,21 @@ public class DeapartmentDaoJDBC implements DepartmentDao{
 		try {
 			st = conn.prepareStatement(
 					"INSERT INTO department "
-					+ "(Id, Name) "
+					+ "(Name) "
 					+"VALUES "
-					+ "(?, ?)",
+					+ "(?)",
 					Statement.RETURN_GENERATED_KEYS);
-			st.setInt(1, obj.getId());
-			st.setString(2, obj.getName());
+			st.setString(1, obj.getName());
 			
 			
 			int rowsAffected = st.executeUpdate();
 			
 			if(rowsAffected > 0) {
 				ResultSet rs = st.getGeneratedKeys();
-				DB.closeResultSet(rs);
+				if (rs.next()) {
+					int id = rs.getInt(1);
+					obj.setId(id);
+				}
 			}
 			else {
 				throw new DbException("Unexpected error! No rows affected!");
@@ -64,6 +66,8 @@ public class DeapartmentDaoJDBC implements DepartmentDao{
 					+ "WHERE Id = ?");
 			st.setString(1, obj.getName());
 			st.setInt(2, obj.getId());
+			
+			st.executeUpdate();
 		}
 		catch(SQLException e) { throw new DbException(e.getMessage());}
 		finally {
